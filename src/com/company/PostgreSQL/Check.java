@@ -17,7 +17,7 @@ public class Check {
                     "postgres", "12345678");
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
             //System.err.println(e.getClass().getName()+": "+e.getMessage());
             //System.exit(0);
             return false;
@@ -48,8 +48,7 @@ public class Check {
             c.close();
             System.out.println("I created db");
         } catch (Exception e) {
-            //System.err.println( e.getClass().getName()+": "+ e.getMessage() );
-            //System.exit(0);
+            System.err.println( e.getClass().getName()+": "+ e.getMessage() );
             System.out.println("Table already exists, all right");
         }
         System.out.println("Table created successfully");
@@ -98,7 +97,7 @@ public class Check {
                     .append(user.getLogin()).append("','")
                     .append(user.getPassword()).append("');").toString();
             stmt.executeUpdate(sql);
-            System.out.println("SUCKsess");
+            System.out.println("Success");
             stmt.close();
             c.commit();
             c.close();
@@ -134,9 +133,7 @@ public class Check {
     }
 
     public static boolean signIn(User user){
-        if (checkForMatch(user.getLogin(), user.getPassword())){
-            return true;
-        } else return false;
+        return checkForMatch(user.getLogin(), user.getPassword());
     }
 
     public static boolean checkForMatch(String login, String password) {
@@ -161,10 +158,13 @@ public class Check {
                     System.out.println("match");
                     match = true;
                 }
+                /*
                 System.out.println("ID = " + id);
                 System.out.println("NAME = " + loginDB);
                 System.out.println("AGE = " + passwordDB);
                 System.out.println();
+                */
+
             }
             rs.close();
             stmt.close();

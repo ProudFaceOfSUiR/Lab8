@@ -2,8 +2,8 @@ package com.company.main;
 
 import com.company.Login.User;
 import com.company.database.DataBase;
-import com.company.database.DataBase1;
-import com.company.database.FileParser1;
+import com.company.database.PostgresqlDatabase;
+import com.company.database.PostgresqlParser;
 import com.company.exceptions.NotConnectedException;
 import com.company.network.Server;
 
@@ -14,11 +14,12 @@ public class Main {
     public static void main(String[] args) {
 
         DataBase dataBase = new DataBase();
-        DataBase1 dataBase1 = new DataBase1();
-        dataBase1.initialize();
+        dataBase.initialize();
+        PostgresqlDatabase postgresqlDatabase = new PostgresqlDatabase();
+        postgresqlDatabase.initialize();
         //dataBase.initialize();
 
-        dataBase.setDatabase(FileParser1.stringToDatabase());
+        dataBase.setDatabase(PostgresqlParser.stringToDatabase());
 
 
         dataBase.show();
@@ -36,7 +37,7 @@ public class Main {
             }
         }
         boolean isConnected = server.connectSocket();
-        boolean user = false;
+        User user;
         while (true){
             //connecting socket
             if (!isConnected){
@@ -44,22 +45,11 @@ public class Main {
                 isConnected = server.connectSocket();
                 continue;
             }
-            User user1 = new User();
             //reading commands from socket
             try {
-                if (!user) {
-                    user1 = server.readCommand();
-                    server.addUser(user1);
-                    dataBase.setUser(user1);
-                    user = true;
-                } else if (!user1.equals(server.readCommand())){
-                    user = false;
-                }
-                else {
-                    if (!user1.equals(server.readCommand())){
-                        System.out.println("wrong password");
-                    }
-                }
+                user = server.readCommand();
+                server.setUser(user);
+                dataBase.setUser(user);
             } catch (NotConnectedException e) {
                 System.out.println(e.getMessage());
                 isConnected = false;

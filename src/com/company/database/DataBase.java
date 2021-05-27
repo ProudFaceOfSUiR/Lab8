@@ -111,10 +111,7 @@ public class DataBase implements Serializable {
         return sb.toString();
     }
 
-    public String add(Worker worker, User user) {
-        //adding to database
-        //worker.setId();
-        worker.setUser(user);
+    public String add(Worker worker) {
         this.database.add(worker);
         sortBySize();
         return "New worker was successfully added!";
@@ -184,6 +181,8 @@ public class DataBase implements Serializable {
     }
 
     public void clear(){
+        System.out.println("FUCKING CLEANING");
+        System.out.println(this.user.getLogin());
         for(int i =0; i<this.database.size();i++) {
             if (database.get(i).getUser().getLogin().equals(this.user.getLogin())) {
                 this.database.remove(i);

@@ -4,10 +4,9 @@ import com.company.Login.User;
 import com.company.PostgreSQL.Check;
 import com.company.classes.Worker;
 import com.company.database.DataBase;
-import com.company.database.FileParser1;
+import com.company.database.PostgresqlParser;
 import com.company.enums.Commands;
 import com.company.exceptions.NotConnectedException;
-import sun.rmi.transport.proxy.CGIHandler;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -27,7 +26,7 @@ public class Server {
     private Messages output;
     private String response;
     private User user;
-    private String login;
+    private User loggedUser;
 
     public ServerSocket getServer() {
         return server;
@@ -37,8 +36,8 @@ public class Server {
         return client;
     }
 
-    public void addUser(User user){
-        this.user = new User(user);
+    public void setUser(User user){
+        this.user = user;
     }
 
     public boolean initialize(DataBase dataBase){
@@ -93,7 +92,6 @@ public class Server {
 
     public User readCommand() throws NotConnectedException {
         //getting message
-        User user = new User();
         try {
             this.input = (Messages) in.readObject();
         } catch (IOException | ClassNotFoundException e) {
@@ -101,10 +99,12 @@ public class Server {
             throw new NotConnectedException();
         }
 
+        User sendler = (User) input.getObject(0);
+
         //getting command from messages
         Commands command;
         try {
-            command = (Commands) input.getObject(0);
+            command = (Commands) input.getObject(1);
         } catch (IndexOutOfBoundsException e){
             System.out.println("Empty input error");
             return null;
@@ -117,15 +117,17 @@ public class Server {
                     System.out.println("Database was initialised, all servers working nominally");
                     Check.create();
                     //User user = new User();
-                    user =(User) input.getObject(1);
-                    System.out.println(user.getLogin());
-                    user.setPassword(User.encryptThisString(user.getPassword()));
-                    if (user.isValid()&&Check.checkForMatch(user.getLogin(), user.getPassword())){
-                        System.out.println(Check.checkForMatch(user.getLogin(), user.getPassword()));
+                    System.out.println(sendler.getLogin());
+                    sendler.setPassword(User.encryptThisString(sendler.getPassword()));
+
+                    if (sendler.isValid() && Check.checkForMatch(sendler.getLogin(), sendler.getPassword())){
+
+                        //System.out.println(Check.checkForMatch(sendler.getLogin(), sendler.getPassword()));
+
                         this.output.addObject(Commands.SIGN_IN);
-                        this.output.addObject(Check.signIn(user));
-                        this.addUser(user);
-                        this.login = this.user.getLogin();
+                        this.output.addObject(Check.signIn(sendler));
+                        this.setUser(sendler);
+                        this.loggedUser = new User(sendler);
                         System.out.println(this.user.getLogin());
                     } else {
                         this.output.addObject(Commands.SIGN_IN);
@@ -133,24 +135,24 @@ public class Server {
                         this.output.addObject("Login or password is not valid");
                     }
                 }
-                //System.out.println("sign_in");
-                //Check.delete(1);
                 break;
             case SIGN_UP:
                 System.out.println("sign_up");
-                //User user1 = new User();
-                user = (User) input.getObject(1);
-                //System.out.println(user1.getLogin());
+
+
                 Check.create();
-                user.setPassword(User.encryptThisString(user.getPassword()));
-                System.out.println(!Check.checkForMatch(user.getLogin(), user.getPassword()));
-                if(!Check.checkForMatch(user.getLogin(), user.getPassword())){
-                    System.out.println("ypupupuppu");
-                    Check.signUp(user);
+
+                sendler.setPassword(User.encryptThisString(sendler.getPassword()));
+
+                if(!Check.checkForMatch(sendler.getLogin(), sendler.getPassword())){
+                    Check.signUp(sendler);
+
                     this.output.addObject(Commands.SIGN_UP);
                     this.output.addObject(true);
-                    this.addUser(user);
-                    this.login = this.user.getLogin();//&&&&
+
+                    this.setUser(sendler);
+                    this.loggedUser = new User(sendler);
+
                     System.out.println(this.user.getLogin());
                 } else {
                     this.output.addObject(Commands.SIGN_UP);
@@ -159,24 +161,12 @@ public class Server {
                 }
                 break;
             case ADD:
-                System.out.println();
-                try {
-                    if (this.user.getLogin().equals(this.login)){
-                    }else{
-                        this.user = new User();
-                        user.setLogin(this.login);
-                    }
-                } catch (NullPointerException e){
-                    this.user = new User();
-                    user.setLogin(this.login);
-                }
-                System.out.println(this.user.getLogin());//????
                 this.output.addObject(Commands.NO_FEEDBACK);
-                this.response = this.dataBase.add((Worker) input.getObject(1),this.user);
+                this.response = this.dataBase.add((Worker) input.getObject(2));
                 break;
             case UPDATE:
                 this.output.addObject(Commands.NO_FEEDBACK);
-                int id = (int) input.getObject(1);
+                int id = (int) input.getObject(2);
                 //check if worker exists
                 int num = -1;
                 for (int i = 0; i< this.dataBase.database.size();i++){
@@ -188,42 +178,40 @@ public class Server {
 
                 //int num = dataBase.returnIndexById(id);
                 try {
-                    if (true) {
-                        if (dataBase.returnIndexById(num) != -1) {
+                    if (dataBase.returnIndexById(num) != -1) {
 
-                            //sending the worker
-                            Messages workerToUpdate = new Messages();
-                            workerToUpdate.addObject(dataBase.getWorkerByIndex(dataBase.returnIndexById(num)));
-                            String log = dataBase.database.get(num).getUser().getLogin();
-                            System.out.println(log);
-                            try {
-                                this.out.writeObject(workerToUpdate);
-                                this.out.flush();
-                            } catch (IOException e) {
-                                System.out.println(e.getMessage());
-                                return user;
-                            }
-                            //getting worker
-                            try {
-                                this.input = (Messages) this.in.readObject();
-                                System.out.println("fllll");
-                            } catch (IOException | ClassNotFoundException e) {
-                                System.out.println(e.getMessage());
-                            }
-                            System.out.println("check");
-                            System.out.println(this.user.getLogin());
-                            System.out.println(this.dataBase.database.get((num)).getLogin());
-                            if (log.equals(this.login)||this.dataBase.database.get((num)).getLogin().equals(this.user.getLogin())) {
-
-                                this.dataBase.remove(String.valueOf(id));
-                                this.dataBase.add((Worker) this.input.getObject(0), this.user);
-                                this.response = "Worker has been successfully updated (server)";
-                            } else {
-                                System.out.println("Invalid ID");
-                            }
-                            } else {
-                            this.response = "Invalid id";
+                        //sending the worker
+                        Messages workerToUpdate = new Messages();
+                        workerToUpdate.addObject(dataBase.getWorkerByIndex(dataBase.returnIndexById(num)));
+                        String log = dataBase.database.get(num).getUser().getLogin();
+                        System.out.println(log);
+                        try {
+                            this.out.writeObject(workerToUpdate);
+                            this.out.flush();
+                        } catch (IOException e) {
+                            System.out.println(e.getMessage());
+                            return sendler;
                         }
+                        //getting worker
+                        try {
+                            this.input = (Messages) this.in.readObject();
+                            System.out.println("fllll");
+                        } catch (IOException | ClassNotFoundException e) {
+                            System.out.println(e.getMessage());
+                        }
+                        System.out.println("check");
+                        System.out.println(this.user.getLogin());
+                        System.out.println(this.dataBase.database.get((num)).getLogin());
+                        if (this.dataBase.database.get((num)).getLogin().equals(this.user.getLogin())) {
+
+                            this.dataBase.remove(String.valueOf(id));
+                            this.dataBase.add((Worker) this.input.getObject(0));
+                            this.response = "Worker has been successfully updated (server)";
+                        } else {
+                            System.out.println("Invalid ID");
+                        }
+                        } else {
+                        this.response = "Invalid id";
                     }
                 }catch (NullPointerException e){
                     this.response = "invalid id";
@@ -231,7 +219,7 @@ public class Server {
                 break;
             case REMOVE_BY_ID:
                 this.output.addObject(Commands.NO_FEEDBACK);
-                this.response = this.dataBase.remove((String)input.getObject(1));
+                this.response = this.dataBase.remove((String)input.getObject(2));
                 break;
             case CLEAR:
                 this.output.addObject(Commands.NO_FEEDBACK);
@@ -239,28 +227,27 @@ public class Server {
                 this.response = "Database was successfully cleared";
                 break;
             case EXIT:
-                //System.out.println(FileParser1.dataBaseToString(dataBase.database));
-                //FileParser1 fileParser1 = new FileParser1();
+                //System.out.println(PostgresqlParser.dataBaseToString(dataBase.database));
+                //PostgresqlParser fileParser1 = new PostgresqlParser();
                 //System.out.println(this.user.getLogin());
                 //System.out.println(this.login);
-                System.out.println(this.login);
                 System.out.println(this.user.getLogin());
-                String s = FileParser1.dataBaseToString(dataBase.getDatabase(),this.login);
+                String s = PostgresqlParser.dataBaseToString(this.dataBase.getDatabase(),this.loggedUser.getLogin());
                 System.out.println(s);
-                Check.save(s, login);
+                Check.save(s, this.loggedUser.getLogin());
                 //this.dataBase.save();
                 break;
             case ADD_IF_MAX:
                 this.output.addObject(Commands.NO_FEEDBACK);
-                this.response = this.dataBase.addIfMax((Worker) input.getObject(1));
+                this.response = this.dataBase.addIfMax((Worker) input.getObject(2));
                 break;
             case REMOVE_GREATER:
                 this.output.addObject(Commands.NO_FEEDBACK);
-                this.response = this.dataBase.removeGreater((String) input.getObject(1));
+                this.response = this.dataBase.removeGreater((String) input.getObject(2));
                 break;
             case REMOVE_LOWER:
                 this.output.addObject(Commands.NO_FEEDBACK);
-                this.response = this.dataBase.removeLower((String) input.getObject(1));
+                this.response = this.dataBase.removeLower((String) input.getObject(2));
                 break;
             case GROUP_COUNTING_BY_POSITION:
                 this.output.addObject(Commands.NO_FEEDBACK);
@@ -268,15 +255,15 @@ public class Server {
                 break;
             case COUNT_LESS_THAN_START_DATE:
                 this.output.addObject(Commands.NO_FEEDBACK);
-                this.response = this.dataBase.countLessThanStartDate((String) input.getObject(1));
+                this.response = this.dataBase.countLessThanStartDate((String) input.getObject(2));
                 break;
             case FILTER_GREATER_THAN_START_DATE:
                 this.output.addObject(Commands.NO_FEEDBACK);
-                this.response = this.dataBase.filterGreaterThanStartDate((String) input.getObject(1));
+                this.response = this.dataBase.filterGreaterThanStartDate((String) input.getObject(2));
                 break;
             case FILL_FROM_FILE:
                 this.output.addObject(Commands.NO_FEEDBACK);
-                this.dataBase.setDatabase((LinkedList<Worker>) input.getObject(1));
+                this.dataBase.setDatabase((LinkedList<Worker>) input.getObject(2));
                 this.response = "Server database has been successfully replaced by client's";
                 break;
             case INFO:
@@ -297,6 +284,6 @@ public class Server {
         }
 
         sendFeedback();
-        return user;
+        return sendler;
     }
 }
