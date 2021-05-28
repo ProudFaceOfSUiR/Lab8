@@ -165,25 +165,34 @@ public class Server {
                 this.response = this.dataBase.add((Worker) input.getObject(2));
                 break;
             case UPDATE:
+                System.out.println("THIS IS UPDATE ");
                 this.output.addObject(Commands.NO_FEEDBACK);
-                int id = (int) input.getObject(2);
+                long id = (long) input.getObject(2);
                 //check if worker exists
                 int num = -1;
                 for (int i = 0; i< this.dataBase.database.size();i++){
                     if (this.dataBase.database.get(i).getId()==id){
                         num = i;
-                        System.out.println(num);
                     }
                 }
-
-                //int num = dataBase.returnIndexById(id);
                 try {
-                    if (dataBase.returnIndexById(num) != -1) {
-
+                    if (num != -1) {
+                        //sedning message if not ours
+                        if (!dataBase.getWorkerByIndex(num)
+                                .getUser().getLogin().equals(this.user.getLogin())){
+                            System.out.println("UPDATE");
+                            System.out.println(dataBase.getWorkerByIndex(num)
+                                    .getUser().getLogin());
+                            System.out.println(this.user.getLogin());
+                            this.response = "It's not your worker.";
+                            break;
+                        }
+                        System.out.println("WE ARE HERE");
                         //sending the worker
                         Messages workerToUpdate = new Messages();
-                        workerToUpdate.addObject(dataBase.getWorkerByIndex(dataBase.returnIndexById(num)));
-                        String log = dataBase.database.get(num).getUser().getLogin();
+                        workerToUpdate.addObject(Commands.NO_FEEDBACK);
+                        workerToUpdate.addObject(dataBase.getWorkerByIndex(num));
+                        String log = dataBase.getWorkerByIndex(num).getUser().getLogin();
                         System.out.println(log);
                         try {
                             this.out.writeObject(workerToUpdate);
@@ -195,26 +204,30 @@ public class Server {
                         //getting worker
                         try {
                             this.input = (Messages) this.in.readObject();
-                            System.out.println("fllll");
                         } catch (IOException | ClassNotFoundException e) {
                             System.out.println(e.getMessage());
                         }
+
+                        System.out.println("---------");
                         System.out.println("check");
                         System.out.println(this.user.getLogin());
-                        System.out.println(this.dataBase.database.get((num)).getLogin());
-                        if (this.dataBase.database.get((num)).getLogin().equals(this.user.getLogin())) {
+                        System.out.println(this.dataBase.getWorkerByIndex(num).getUser().getLogin());
+                        System.out.println(this.dataBase.getWorkerByIndex(num).getName());
+                        System.out.println("---------");
 
+                        if (this.dataBase.getWorkerByIndex(num).getUser().getLogin().equals(this.user.getLogin())) {
+                            System.out.println("UPDATING");
                             this.dataBase.remove(String.valueOf(id));
                             this.dataBase.add((Worker) this.input.getObject(0));
                             this.response = "Worker has been successfully updated (server)";
                         } else {
-                            System.out.println("Invalid ID");
+                            System.out.println("It's not yours");
                         }
-                        } else {
-                        this.response = "Invalid id";
+                    } else {
+                        this.response = "invalid id";
                     }
-                }catch (NullPointerException e){
-                    this.response = "invalid id";
+                } catch (NullPointerException e){
+                    this.response = "invalid id (catch)";
                 }
                 break;
             case REMOVE_BY_ID:
@@ -227,15 +240,10 @@ public class Server {
                 this.response = "Database was successfully cleared";
                 break;
             case EXIT:
-                //System.out.println(PostgresqlParser.dataBaseToString(dataBase.database));
-                //PostgresqlParser fileParser1 = new PostgresqlParser();
-                //System.out.println(this.user.getLogin());
-                //System.out.println(this.login);
                 System.out.println(this.user.getLogin());
                 String s = PostgresqlParser.dataBaseToString(this.dataBase.getDatabase(),this.loggedUser.getLogin());
                 System.out.println(s);
                 Check.save(s, this.loggedUser.getLogin());
-                //this.dataBase.save();
                 break;
             case ADD_IF_MAX:
                 this.output.addObject(Commands.NO_FEEDBACK);
@@ -281,6 +289,7 @@ public class Server {
             default:
                 this.output.addObject(Commands.NO_FEEDBACK);
                 this.response = ("Unexpected value: " + command);
+                break;
         }
 
         sendFeedback();

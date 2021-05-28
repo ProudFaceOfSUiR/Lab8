@@ -15,10 +15,6 @@ import java.util.stream.Collectors;
 
 import com.company.enums.Commands;
 import com.company.enums.Position;
-import com.company.exceptions.OperationCanceledException;
-import com.company.exceptions.UnknownCommandException;
-
-import javax.jws.soap.SOAPBinding;
 
 public class DataBase implements Serializable {
 
@@ -181,7 +177,6 @@ public class DataBase implements Serializable {
     }
 
     public void clear(){
-        System.out.println("FUCKING CLEANING");
         System.out.println(this.user.getLogin());
         for(int i =0; i<this.database.size();i++) {
             if (database.get(i).getUser().getLogin().equals(this.user.getLogin())) {
@@ -244,12 +239,15 @@ public class DataBase implements Serializable {
         int toRemoveCounter = 0;
         long toRemoveID[] = new long[this.database.size()];
         for (int i = 0; i < this.database.size(); i++) {
-            if ((this.database.get(i).getSalary() > salary)&&database.get(i).getUser().getLogin().equals(this.user.getLogin())){
-                if (database.get(i).getUser().getLogin().equals(this.user.getLogin())) {
-                    toRemoveID[toRemoveCounter] = this.database.get(i).getId();
-                    toRemoveCounter++;
-                }
+            if ((this.database.get(i).getSalary() > salary)
+                    && database.get(i).getUser().getLogin().equals(this.user.getLogin())){
+                toRemoveID[toRemoveCounter] = this.database.get(i).getId();
+                toRemoveCounter++;
             }
+        }
+
+        if (toRemoveCounter < 0){
+            return "There was no such your workers";
         }
 
         for (int i = 0; i < toRemoveCounter; i++) {

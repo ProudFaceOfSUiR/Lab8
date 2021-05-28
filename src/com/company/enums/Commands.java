@@ -2,9 +2,9 @@ package com.company.enums;
 
 public enum Commands {
     //args should be in {} for better formatting
-    NO_FEEDBACK("",""),
-    SIGN_IN("",""),
-    SIGN_UP("",""),
+    NO_FEEDBACK("","special"),
+    SIGN_IN("","special"),
+    SIGN_UP("","special"),
     HELP ("","Available commands"),
     INFO ("","Information about current stat of Collection"),
     SHOW ("","Prints all the elements"),
@@ -12,7 +12,7 @@ public enum Commands {
     UPDATE("{id}","Update worker's fields"),
     REMOVE_BY_ID("{id}","Removes worker"), //it's not me shit-naming, it's the tech task
     CLEAR("","Clears the database"),
-    EXECUTE_SCRIPT("",""),
+    EXECUTE_SCRIPT("{file_name}","execute commands from file"),
     EXIT("","Exit database"),
     ADD_IF_MAX("","Add element, if its SALARY is max"),
     REMOVE_GREATER("{salary}","Remove all elements, greater than given"),

@@ -33,31 +33,6 @@ import java.util.LinkedList;
 public class PostgresqlParser {
 
     /**
-     * Check if file path is valid
-     * @param filePath
-     * @return
-     */
-    public static boolean pathCheck(String filePath){
-        if (!filePath.matches("\\s*\\w+.xml")){
-            System.out.println("Invalid path. Couldn't get file");
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * Checks if we have permissions to read file
-     * @param filePath
-     * @return
-     */
-    public static boolean permissionToReadCheck(Path filePath){
-        if (!Files.isReadable((filePath))){
-            System.out.println("File is restricted from editing.");
-            return false;
-        } else return true;
-    }
-
-    /**
      * Checks if file already exists
      * @param filePath
      * @return
@@ -65,40 +40,6 @@ public class PostgresqlParser {
     public static boolean alreadyExistCheck(String filePath) {
         File f = new File(filePath);
         return f.exists() && !f.isDirectory();
-    }
-
-    /**
-     * question if we want to overwrite file
-     * @param filePath
-     * @return
-     * @throws OperationCanceledException
-     */
-    public static boolean overWriteFile(String filePath) throws OperationCanceledException{
-        //check if file exists
-        if (alreadyExistCheck(filePath)) {
-            //giving the choice
-            return Terminal.binaryChoice("overwrite the existing file");
-        } else return true; //"overwriting" nonexistent file
-    }
-
-    /**
-     * Gives path from class Path from string with path
-     * @param path
-     * @return
-     */
-    public static Path getPath(String path){
-        File f = new File(path);
-        Path p;
-        try {
-            p = f.toPath();
-        } catch (Exception e){
-            System.out.println(e.getMessage());
-            return null;
-        }
-        if (Files.notExists(p)){
-            System.out.println("File doesn't exist!");
-            return null;
-        } else return p.normalize();
     }
 
     /**
@@ -178,10 +119,10 @@ public class PostgresqlParser {
             ResultSet rs = stmt.executeQuery( "SELECT * FROM DATABASE;" );
             LinkedList<Worker> collection = new LinkedList<>();
             Worker worker = new Worker();
-            int ID;
+            long ID;
             while ( rs.next() ) {
                 User user = new User();
-                ID = (rs.getInt("id"));
+                ID = (rs.getLong    ("id"));
                 name = rs.getString("name");
                 salary = rs.getDouble("salary");
                 position = Position.findEnum(rs.getString("position"));
