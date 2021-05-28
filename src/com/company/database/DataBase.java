@@ -99,9 +99,12 @@ public class DataBase implements Serializable {
     public String help(){
         StringBuilder sb = new StringBuilder();
 
+        String[] commands = Commands.getCommandsWithDescriptions();
         sb.append("Commands: ");sb.append("\n");
         for (int i = 0; i < Commands.values().length - 1; i++) {
-            sb.append(" " + Commands.getCommandsWithDescriptions()[i]);sb.append("\n");
+            if (commands[i] != null) {
+                sb.append(" ").append(commands[i]).append("\n");
+            }
         }
 
         return sb.toString();
