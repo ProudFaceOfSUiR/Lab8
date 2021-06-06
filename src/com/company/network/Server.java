@@ -36,6 +36,10 @@ public class Server {
         return client;
     }
 
+    public void setClient(Socket client) {
+        this.client = client;
+    }
+
     public void setUser(User user){
         this.user = user;
     }
@@ -43,28 +47,11 @@ public class Server {
     public boolean initialize(DataBase dataBase){
         this.dataBase = dataBase;
         this.output = new Messages();
-
-        try {
-            this.server = new ServerSocket(1488);
-            System.out.println("Server has started");
-        } catch (IOException e) {
-            System.out.println("Server couldn't start: " + e.getMessage());
-            return false;
-        }
-
         return true;
     }
 
     public boolean connectSocket(){
         //connecting socket
-        try {
-            this.client = server.accept();
-            System.out.println("Connection accepted");
-        } catch (IOException e) {
-            System.out.print("Connection error: " + e.getMessage());
-            return false;
-        }
-
         //getting streams
         try {
             this.out = new ObjectOutputStream(client.getOutputStream());

@@ -80,80 +80,74 @@ public class PostgresqlParser {
         return sb.toString();
     }
 
-    public static LinkedList<Worker> stringToDatabase(){
+    public static LinkedList<Worker> stringToDatabase() throws Exception{
         Connection c = null;
         Statement stmt = null;
-        try {
-            Class.forName("org.postgresql.Driver");
-            c = DriverManager
-                    .getConnection("jdbc:postgresql://localhost:5432/postgres",
-                            "postgres", "12345678");
-            c.setAutoCommit(false);
-            System.out.println("Opened database successfully");
+        Class.forName("org.postgresql.Driver");
+        c = DriverManager
+                .getConnection("jdbc:postgresql://localhost:5432/postgres",
+                        "postgres", "12345678");
+        c.setAutoCommit(false);
+        System.out.println("Opened database successfully");
 
-            //fields of a worker
-            String name;
-            double salary;
+        //fields of a worker
+        String name;
+        double salary;
 
-            //position
-            String positionString;
-            Position position;
+        //position
+        String positionString;
+        Position position;
 
-            //personality
-            Person person = null;
+        //personality
+        Person person = null;
 
-            //coordinates
-            Coordinates coordinates;
+        //coordinates
+        Coordinates coordinates;
 
-            //dates
-            ZonedDateTime startdate;
-            ZonedDateTime endDate = null;
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        //dates
+        ZonedDateTime startdate;
+        ZonedDateTime endDate = null;
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-            //counter of successfully added workers
-            int successfullyAddedWorkers = 0;
+        //counter of successfully added workers
+        int successfullyAddedWorkers = 0;
 
-            //User user = new User();
+        //User user = new User();
 
-            stmt = c.createStatement();
-            ResultSet rs = stmt.executeQuery( "SELECT * FROM DATABASE;" );
-            LinkedList<Worker> collection = new LinkedList<>();
-            Worker worker = new Worker();
-            long ID;
-            while ( rs.next() ) {
-                User user = new User();
-                ID = (rs.getLong    ("id"));
-                name = rs.getString("name");
-                salary = rs.getDouble("salary");
-                position = Position.findEnum(rs.getString("position"));
-                String[] heightWeight = rs.getString("person").split(",");
-                person = new Person(Long.valueOf(Terminal.removeSpaces(heightWeight[0])), Integer.valueOf(Terminal.removeSpaces(heightWeight[1])));
-                String[] xy = rs.getString("coordinates").split(",");
-                coordinates = new Coordinates(Long.parseLong(Terminal.removeSpaces(xy[0])), Integer.valueOf(Terminal.removeSpaces(xy[1])));
-                LocalDate date = LocalDate.parse(
-                        Terminal.removeSpaces(
-                                rs.getString("startdate")),
-                        formatter);
-                startdate = date.atStartOfDay(ZoneId.systemDefault());
-                LocalDate date1 = LocalDate.parse(
-                        Terminal.removeSpaces(
-                                rs.getString("enddate")),
-                        formatter);
-                endDate = date.atStartOfDay(ZoneId.systemDefault());
+        stmt = c.createStatement();
+        ResultSet rs = stmt.executeQuery( "SELECT * FROM DATABASE;" );
+        LinkedList<Worker> collection = new LinkedList<>();
+        Worker worker = new Worker();
+        long ID;
+        while ( rs.next() ) {
+            User user = new User();
+            ID = (rs.getLong    ("id"));
+            name = rs.getString("name");
+            salary = rs.getDouble("salary");
+            position = Position.findEnum(rs.getString("position"));
+            String[] heightWeight = rs.getString("person").split(",");
+            person = new Person(Long.valueOf(Terminal.removeSpaces(heightWeight[0])), Integer.valueOf(Terminal.removeSpaces(heightWeight[1])));
+            String[] xy = rs.getString("coordinates").split(",");
+            coordinates = new Coordinates(Long.parseLong(Terminal.removeSpaces(xy[0])), Integer.valueOf(Terminal.removeSpaces(xy[1])));
+            LocalDate date = LocalDate.parse(
+                    Terminal.removeSpaces(
+                            rs.getString("startdate")),
+                    formatter);
+            startdate = date.atStartOfDay(ZoneId.systemDefault());
+            LocalDate date1 = LocalDate.parse(
+                    Terminal.removeSpaces(
+                            rs.getString("enddate")),
+                    formatter);
+            endDate = date.atStartOfDay(ZoneId.systemDefault());
 
-                user.setLogin(Terminal.removeSpaces(rs.getString("login")));
-                user.setPassword("");
-                collection.add(new Worker(ID,name, salary, position, person, coordinates, startdate, endDate,user));
-                successfullyAddedWorkers++;
-            }
-            rs.close();
-            stmt.close();
-            c.close();
-            return collection;
-        } catch ( Exception e ) {
-            System.err.println( e.getClass().getName()+": "+ e.getMessage() );
-            //System.exit(0);
-            return null;
+            user.setLogin(Terminal.removeSpaces(rs.getString("login")));
+            user.setPassword("");
+            collection.add(new Worker(ID,name, salary, position, person, coordinates, startdate, endDate,user));
+            successfullyAddedWorkers++;
         }
+        rs.close();
+        stmt.close();
+        c.close();
+        return collection;
     }
 }
