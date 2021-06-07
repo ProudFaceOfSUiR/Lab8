@@ -39,7 +39,7 @@ public class ServerThread implements Runnable {
             DataBase dataBase = new DataBase();
             PostgresqlDatabase dataBase1 = new PostgresqlDatabase();
             dataBase1.initialize();
-            //dataBase.initialize();
+            dataBase.initialize();
 
             dataBase.setDatabase(PostgresqlParser.stringToDatabase());
 
@@ -79,7 +79,7 @@ public class ServerThread implements Runnable {
                     System.out.println(e.getMessage());
                     isConnected = false;
                 } catch (NullPointerException e){
-                    System.out.println("nu;;");
+                    System.out.println("null");
                 }
             }
         } catch (IOException | InterruptedException e) {

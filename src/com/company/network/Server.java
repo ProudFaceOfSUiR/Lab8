@@ -67,7 +67,7 @@ public class Server {
     protected void sendFeedback(){
         this.output.addObject(response);
         try {
-            System.out.println(this.output.getObject(0));
+            System.out.println("output: " + this.output.getObject(0));
             this.out.writeObject(this.output);
             this.out.flush();
             this.out.reset();
@@ -267,7 +267,8 @@ public class Server {
                 break;
             case SHOW:
                 this.output.addObject(Commands.NO_FEEDBACK);
-                this.response = dataBase.show();
+                this.response = "Database";
+                this.output.addObject(dataBase.show());
                 break;
             case HELP:
                 this.output.addObject(Commands.NO_FEEDBACK);

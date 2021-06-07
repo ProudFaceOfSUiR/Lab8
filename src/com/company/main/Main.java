@@ -20,9 +20,8 @@ public class Main {
 
     public static void main(String[] args) {
         // стартуем сервер на порту 3345 и инициализируем переменную для обработки консольных команд с самого сервера
-        try (ServerSocket server = new ServerSocket(1488);
-             BufferedReader br = new BufferedReader(new InputStreamReader(System.in))) {
-            System.out.println("Server socket created, command console reader for listen to server commands");
+        try (ServerSocket server = new ServerSocket(1488);) {
+            System.out.println("Server socket created");
 
             // стартуем цикл при условии что серверный сокет не закрыт
             while (!server.isClosed()) {

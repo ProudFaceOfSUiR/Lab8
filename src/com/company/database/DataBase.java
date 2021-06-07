@@ -116,20 +116,16 @@ public class DataBase implements Serializable {
         return "New worker was successfully added!";
     }
 
-    public String show(){
+    public List<Vector<String>> show(){
+        List<Vector<String>> rows = new ArrayList<>();
 
         //checking if database is empty
         if (database.isEmpty()){
-            return "Database is empty";
+            return rows;
         }
 
-        StringBuilder stringBuilder = new StringBuilder();
-
-        List<List<String>> rows = new ArrayList<>();
-        List<String> headers = Arrays.asList("Name", "id", "Salary", "Position", "Personality", "Coordinates", "Start Date", "End Date", "User");
-        rows.add(headers);
         StringBuilder coord = new StringBuilder();
-        ArrayList<String> sb = new ArrayList<>();
+        Vector<String> sb = new Vector<>();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         for (Worker worker : database) {
             sb.add(worker.getName());sb.add(String.valueOf(worker.getId()));sb.add(String.valueOf(worker.getSalary()));
@@ -161,12 +157,12 @@ public class DataBase implements Serializable {
 
             sb.add(worker.getUser().getLogin());
 
-            rows.add((List<String>) sb.clone());
+            rows.add((Vector<String>) sb.clone());
             sb.clear();
         }
-        stringBuilder.append(Terminal.formatAsTable(rows));
+        //stringBuilder.append(Terminal.formatAsTable(rows));
 
-        return stringBuilder.toString();
+        return rows;
     }
 
     public String info(){
