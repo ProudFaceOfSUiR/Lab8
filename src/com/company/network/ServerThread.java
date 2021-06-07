@@ -12,10 +12,12 @@ import com.company.exceptions.NotConnectedException;
 
 
 public class ServerThread implements Runnable {
+    private DataBase dataBase;
     private static Socket clientDialog;
 
-    public ServerThread(Socket client) {
+    public ServerThread(Socket client, DataBase database) {
         ServerThread.clientDialog = client;
+        this.dataBase = database;
     }
 
     @Override
@@ -36,12 +38,6 @@ public class ServerThread implements Runnable {
             // основная рабочая часть //
             //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-            DataBase dataBase = new DataBase();
-            PostgresqlDatabase dataBase1 = new PostgresqlDatabase();
-            dataBase1.initialize();
-            dataBase.initialize();
-
-            dataBase.setDatabase(PostgresqlParser.stringToDatabase());
             Server server = new Server();
             boolean isInitialized = false;
             while (!isInitialized) {
@@ -121,7 +117,7 @@ public class ServerThread implements Runnable {
                 }
             }
             */
-        } catch (IOException | InterruptedException e) {
+        } catch (IOException e) {
             System.out.println("check");
             e.printStackTrace();
         } catch (Exception e) {

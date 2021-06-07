@@ -1,6 +1,9 @@
 package com.company.main;
 
 import com.company.Login.User;
+import com.company.database.DataBase;
+import com.company.database.PostgresqlDatabase;
+import com.company.database.PostgresqlParser;
 import com.company.exceptions.NotConnectedException;
 import com.company.network.Server;
 import com.company.network.ServerThread;
@@ -19,6 +22,16 @@ public class Main {
     static ExecutorService executeIt = Executors.newFixedThreadPool(2);
 
     public static void main(String[] args) {
+        DataBase dataBase = new DataBase();
+        PostgresqlDatabase dataBase1 = new PostgresqlDatabase();
+        dataBase1.initialize();
+        dataBase.initialize();
+
+        try {
+            dataBase.setDatabase(PostgresqlParser.stringToDatabase());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         // стартуем сервер на порту 3345 и инициализируем переменную для обработки консольных команд с самого сервера
         try (ServerSocket server = new ServerSocket(1488);) {
             System.out.println("Server socket created");
@@ -34,7 +47,7 @@ public class Main {
                 // в Runnable(при необходимости можно создать Callable)
                 // монопоточную нить = сервер - MonoThreadClientHandler и тот
                 // продолжает общение от лица сервера
-                executeIt.execute(new ServerThread(client));
+                executeIt.execute(new ServerThread(client,dataBase));
                 System.out.print("Connection accepted.");
             }
 
