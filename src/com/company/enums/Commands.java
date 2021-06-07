@@ -20,7 +20,8 @@ public enum Commands {
     GROUP_COUNTING_BY_POSITION("","Print groups made by position"),
     COUNT_LESS_THAN_START_DATE("{start date (yyyy-mm-dd)}","Print number of elements with START DATE lesser than given"),
     FILTER_GREATER_THAN_START_DATE("{start date (yyyy-mm-dd)}","Print elements with START DATE greater than given"),
-    FILL_FROM_FILE("","special");
+    FILL_FROM_FILE("","special"),
+    GET_DATABASE("","special");
 
     private String argument;
     private String description;

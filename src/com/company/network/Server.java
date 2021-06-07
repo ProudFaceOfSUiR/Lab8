@@ -274,6 +274,11 @@ public class Server {
                 this.output.addObject(Commands.NO_FEEDBACK);
                 this.response = dataBase.help();
                 break;
+            case GET_DATABASE:
+                this.output.addObject(Commands.NO_FEEDBACK);
+                this.response = "Database";
+                this.output.addObject(this.dataBase.database);
+                break;
             default:
                 this.output.addObject(Commands.NO_FEEDBACK);
                 this.response = ("Unexpected value: " + command);
