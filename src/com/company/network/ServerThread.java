@@ -42,6 +42,44 @@ public class ServerThread implements Runnable {
             dataBase.initialize();
 
             dataBase.setDatabase(PostgresqlParser.stringToDatabase());
+            Server server = new Server();
+            boolean isInitialized = false;
+            while (!isInitialized) {
+                isInitialized = server.initialize(dataBase);
+                if (!isInitialized) {
+                    try {
+                        Thread.sleep(5000);
+                    } catch (InterruptedException e) {
+                        System.out.println(e.getMessage());
+                    }
+                }
+            }
+            server.setClient(clientDialog);
+            server.connectSocket();
+            User user1;
+            //reading commands from socket
+            while (true) {
+                try {
+                    user1 = server.readCommand();
+                    server.setUser(user1);
+                    dataBase.setUser(user1);
+                } catch (NotConnectedException e) {
+                    System.out.println(e.getMessage());
+                    break;
+                } catch (NullPointerException e) {
+                    System.out.println("null");
+                }
+            }
+
+
+            /////////////////////////////////////////////////////////
+            /*
+            DataBase dataBase = new DataBase();
+            PostgresqlDatabase dataBase1 = new PostgresqlDatabase();
+            dataBase1.initialize();
+            dataBase.initialize();
+
+            dataBase.setDatabase(PostgresqlParser.stringToDatabase());
 
 
             dataBase.show();
@@ -82,12 +120,12 @@ public class ServerThread implements Runnable {
                     System.out.println("null");
                 }
             }
+            */
         } catch (IOException | InterruptedException e) {
             System.out.println("check");
             e.printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 }
