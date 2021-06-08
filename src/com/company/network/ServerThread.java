@@ -5,6 +5,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import com.company.Login.User;
+import com.company.PostgreSQL.Check;
 import com.company.database.DataBase;
 import com.company.database.PostgresqlDatabase;
 import com.company.database.PostgresqlParser;
@@ -66,7 +67,6 @@ public class ServerThread implements Runnable {
                     System.out.println("null");
                 }
             }
-
 
             /////////////////////////////////////////////////////////
             /*

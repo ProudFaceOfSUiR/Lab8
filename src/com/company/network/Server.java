@@ -4,6 +4,7 @@ import com.company.Login.User;
 import com.company.PostgreSQL.Check;
 import com.company.classes.Worker;
 import com.company.database.DataBase;
+import com.company.database.PostgresqlDatabase;
 import com.company.database.PostgresqlParser;
 import com.company.enums.Commands;
 import com.company.exceptions.NotConnectedException;
@@ -231,6 +232,16 @@ public class Server {
                 String s = PostgresqlParser.dataBaseToString(this.dataBase.getDatabase(),this.loggedUser.getLogin());
                 System.out.println(s);
                 Check.save(s, this.loggedUser.getLogin());
+
+                PostgresqlDatabase dataBase1 = new PostgresqlDatabase();
+                dataBase1.initialize();
+
+                try {
+                    this.dataBase.setDatabase(PostgresqlParser.stringToDatabase());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
                 break;
             case ADD_IF_MAX:
                 this.output.addObject(Commands.NO_FEEDBACK);
